@@ -1,4 +1,4 @@
-## node.js hw-02
+## node.js hw-03 mongoDB
 
 Задание:
-https://github.com/goitacademy/nodejs-homework/blob/master/homework-02/README.md
+https://github.com/Salimyaro/nodejs-hw2-6/tree/03-mongodb
