@@ -1,4 +1,4 @@
-## node.js hw-03 mongoDB
+## node.js hw-04 auth
 
 Задание:
-https://github.com/Salimyaro/nodejs-hw2-6/tree/03-mongodb
+https://github.com/goitacademy/nodejs-homework/tree/master/homework-04

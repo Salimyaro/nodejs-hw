@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { HttpCode } from "../../../helpers/constants.js";
 
 const schemaCreateContact = Joi.object({
   name: Joi.string().min(3).max(60).required(),
@@ -25,7 +26,7 @@ const validate = (schema, obj, next) => {
   if (error) {
     const [{ message }] = error.details;
     return next({
-      status: 400,
+      status: HttpCode.BAD_REQUEST,
       message: `${message.replace(/"/g, "")}`,
     });
   }
