@@ -1,11 +1,12 @@
 import Contacts from "../model/contacts.js";
+import { HttpCode } from "../helpers/constants.js";
 
-const getAll = async (_req, res, next) => {
+const getAll = async ({ query, user }, res, next) => {
   try {
-    const contacts = await Contacts.listContacts();
-    return res.status(200).json({
+    const contacts = await Contacts.listContacts(user.id, query);
+    return res.status(HttpCode.OK).json({
       status: "success",
-      code: 200,
+      code: HttpCode.OK,
       data: {
         contacts,
       },
@@ -15,21 +16,21 @@ const getAll = async (_req, res, next) => {
   }
 };
 
-const getById = async ({ params }, res, next) => {
+const getById = async ({ params, user }, res, next) => {
   try {
-    const contact = await Contacts.getContactById(params.contactId);
+    const contact = await Contacts.getContactById(params.contactId, user.id);
     if (contact) {
-      return res.status(200).json({
+      return res.status(HttpCode.OK).json({
         status: "success",
-        code: 200,
+        code: HttpCode.OK,
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: "error",
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
     }
@@ -38,12 +39,12 @@ const getById = async ({ params }, res, next) => {
   }
 };
 
-const create = async ({ body }, res, next) => {
+const create = async ({ body, user }, res, next) => {
   try {
-    const contact = await Contacts.addContact(body);
-    return res.status(201).json({
+    const contact = await Contacts.addContact({ ...body, owner: user.id });
+    return res.status(HttpCode.CREATED).json({
       status: "success",
-      code: 201,
+      code: HttpCode.CREATED,
       data: {
         contact,
       },
@@ -53,19 +54,19 @@ const create = async ({ body }, res, next) => {
   }
 };
 
-const remove = async ({ params }, res, next) => {
+const remove = async ({ params, user }, res, next) => {
   try {
-    const contact = await Contacts.removeContact(params.contactId);
+    const contact = await Contacts.removeContact(params.contactId, user.id);
     if (contact) {
-      return res.status(200).json({
+      return res.status(HttpCode.OK).json({
         status: "success",
-        code: 200,
+        code: HttpCode.OK,
         message: "contact deleted",
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: "error",
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
     }
@@ -74,28 +75,32 @@ const remove = async ({ params }, res, next) => {
   }
 };
 
-const update = async ({ params, body }, res, next) => {
+const update = async ({ params, body, user }, res, next) => {
   try {
     if (!body.name && !body.email && !body.phone) {
-      return res.status(400).json({
+      return res.status(HttpCode.BAD_REQUEST).json({
         status: "error",
-        code: 400,
+        code: HttpCode.BAD_REQUEST,
         message: "missing fields",
       });
     }
-    const contact = await Contacts.updateContact(params.contactId, body);
+    const contact = await Contacts.updateContact(
+      params.contactId,
+      body,
+      user.id
+    );
     if (contact) {
-      return res.status(200).json({
+      return res.status(HttpCode.OK).json({
         status: "success",
-        code: 200,
+        code: HttpCode.OK,
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: "error",
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: "Not Found",
       });
     }
@@ -110,4 +115,4 @@ export default {
   create,
   update,
   remove,
-}
+};
