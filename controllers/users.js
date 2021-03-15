@@ -1,13 +1,17 @@
 import jwt from "jsonwebtoken";
 import Users from "../model/users.js";
+import fs from "fs/promises";
+import path from "path";
+import Jimp from "jimp";
+import checkOrMakeFolder from "../helpers/create-dir.js";
 import { HttpCode } from "../helpers/constants.js";
 import dotenv from "dotenv";
 dotenv.config();
 
 const SECRET_KEY = process.env.JWT_SECRET;
+const PORT = process.env.PORT
 
 const reg = async ({ body }, res, next) => {
-  console.log(body);
   try {
     const user = await Users.findByEmail(body.email);
     if (user) {
@@ -24,6 +28,7 @@ const reg = async ({ body }, res, next) => {
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
+        avatar: newUser.avatar,
       },
     });
   } catch (e) {
@@ -52,6 +57,7 @@ const login = async ({ body }, res, next) => {
         token,
         user: {
           email: user.email,
+          avatar: user.avatar,
           subscription: user.subscription,
         },
       },
@@ -80,7 +86,6 @@ const logout = async ({ user }, res, next) => {
 
 const current = async ({ user }, res, next) => {
   try {
-    console.dir(user)
     const currentUser = await Users.findById(user.id);
     if (!currentUser) {
       return res.status(HttpCode.UNAUTHORIZED).json({
@@ -94,6 +99,7 @@ const current = async ({ user }, res, next) => {
       code: HttpCode.OK,
       email: currentUser.email,
       subscription: currentUser.subscription,
+      avatar: currentUser.avatar,
     });
   } catch (e) {
     next(e);
@@ -117,4 +123,41 @@ const updateSubscription = async ({ user, body }, res, next) => {
   }
 };
 
-export default { reg, login, logout, current, updateSubscription };
+const avatars = async (req, res, next) => {
+  try {
+    const avatarUrl = await saveAvatarToStatic(req);
+    await Users.updateAvatarUrl(req.user.id, avatarUrl);
+    return res.json({
+      status: "success",
+      code: HttpCode.OK,
+      data: {
+        avatarUrl,
+      },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const saveAvatarToStatic = async ({ user, file }) => {
+  const USERS_AVATARS_DIR = process.env.USERS_AVATARS_DIR;
+  const newAvatarName = `${Date.now()}-${file.originalname}`;
+  const img = await Jimp.read(file.path);
+  img
+    .autocrop()
+    .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
+    .writeAsync(file.path);
+
+  await checkOrMakeFolder(path.join(USERS_AVATARS_DIR, user.id));
+  await fs.rename(
+    file.path,
+    path.join(USERS_AVATARS_DIR, user.id, newAvatarName)
+  );
+  const avatarUrl = path.normalize(
+    path.join(`http://localhost:${PORT}/images`, user.id, newAvatarName)
+  );
+  
+  return avatarUrl;
+};
+
+export default { reg, login, logout, current, updateSubscription, avatars };

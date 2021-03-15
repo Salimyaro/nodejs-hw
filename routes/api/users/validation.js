@@ -33,7 +33,18 @@ function subscriptionUpdate(req, _res, next) {
   return validate(schemaSubscriptionUpdate, req.body, next);
 }
 
+function uploadAvatar(req, _res, next) {
+  if (!req.file) {
+    return next({
+      status: HttpCode.BAD_REQUEST,
+      message: "Field of avatar with file not found",
+    });
+  }
+  next();
+}
+
 export default {
   user,
   subscriptionUpdate,
+  uploadAvatar,
 };
