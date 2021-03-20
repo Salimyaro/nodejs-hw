@@ -3,8 +3,10 @@ import Users from "../model/users.js";
 import fs from "fs/promises";
 import path from "path";
 import Jimp from "jimp";
+import { v4 as uuidv4 } from "uuid";
 import checkOrMakeFolder from "../helpers/create-dir.js";
 import { HttpCode } from "../helpers/constants.js";
+import EmailService from "../services/email.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -21,7 +23,14 @@ const reg = async ({ body }, res, next) => {
         message: "Email in use",
       });
     }
-    const newUser = await Users.create(body);
+    const verificationToken = uuidv4();
+    const emailService = new EmailService(process.env.NODE_ENV);
+    await emailService.sendEmail(verificationToken, body.email);
+    const newUser = await Users.create({
+      ...body,
+      verify: false,
+      verificationToken,
+    });
     return res.status(HttpCode.CREATED).json({
       status: "user created",
       code: HttpCode.CREATED,
@@ -39,11 +48,19 @@ const reg = async ({ body }, res, next) => {
 const login = async ({ body }, res, next) => {
   try {
     const user = await Users.findByEmail(body.email);
-    if (!user || !(await user.validPassword(body.password))) {
+    const isValidPassword = await user?.validPassword(body.password);
+    if (!user || !isValidPassword) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
         message: "Email or password is wrong",
+      });
+    }
+    if (!user.verify) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message: "Email not verified",
       });
     }
     const id = user._id;
@@ -160,4 +177,28 @@ const saveAvatarToStatic = async ({ user, file }) => {
   return avatarUrl;
 };
 
-export default { reg, login, logout, current, updateSubscription, avatars };
+const verifyToken = async (req, res, next) => {
+  try {
+    const user = await Users.findByVerificationToken(
+      req.params.verificationToken
+    );
+    if (user) {
+      await Users.updateVerifyToken(user.id, true, null);
+      return res.json({
+        status: "success",
+        code: HttpCode.OK,
+        message: "Verification successful!",
+      });
+    }
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "error",
+      code: HttpCode.BAD_REQUEST,
+      message: "User not found",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+
+export default { reg, login, logout, current, updateSubscription, avatars, verifyToken };
