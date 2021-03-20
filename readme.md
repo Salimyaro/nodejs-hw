@@ -1,4 +1,4 @@
-## node.js hw-05 images
+## node.js hw-06 email
 
 Задание:
-https://github.com/goitacademy/nodejs-homework/tree/master/homework-05
+https://github.com/goitacademy/nodejs-homework/tree/master/homework-06
