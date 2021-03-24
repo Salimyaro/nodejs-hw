@@ -1,9 +1,9 @@
-import express from "express";
-const { Router } = express;
-import validate from "./validation.js";
-import contactsController from "../../../controllers/contacts.js";
-import guard from "../../../helpers/guard.js";
-const router = Router();
+const express = require("express");
+const router = express.Router();
+
+const contactsController = require("../../../controllers/contacts");
+const guard = require("../../../helpers/guard");
+const validate = require("./validation");
 
 router
   .post("/", guard, validate.createContact, contactsController.create)
@@ -19,4 +19,4 @@ router
   )
   .delete("/:contactId", guard, contactsController.remove);
 
-export default router;
+module.exports = router;

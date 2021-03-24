@@ -1,11 +1,11 @@
-import Contacts from "../model/contacts.js";
-import { HttpCode } from "../helpers/constants.js";
+const Contacts = require("../model/contacts");
+const { HttpCode, Status } = require("../helpers/constants");
 
 const getAll = async ({ query, user }, res, next) => {
   try {
     const contacts = await Contacts.listContacts(user.id, query);
     return res.status(HttpCode.OK).json({
-      status: "success",
+      status: Status.SUCCESS,
       code: HttpCode.OK,
       data: {
         contacts,
@@ -21,7 +21,7 @@ const getById = async ({ params, user }, res, next) => {
     const contact = await Contacts.getContactById(params.contactId, user.id);
     if (contact) {
       return res.status(HttpCode.OK).json({
-        status: "success",
+        status: Status.SUCCESS,
         code: HttpCode.OK,
         data: {
           contact,
@@ -29,7 +29,7 @@ const getById = async ({ params, user }, res, next) => {
       });
     } else {
       return res.status(HttpCode.NOT_FOUND).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
@@ -43,7 +43,7 @@ const create = async ({ body, user }, res, next) => {
   try {
     const contact = await Contacts.addContact({ ...body, owner: user.id });
     return res.status(HttpCode.CREATED).json({
-      status: "success",
+      status: Status.SUCCESS,
       code: HttpCode.CREATED,
       data: {
         contact,
@@ -59,13 +59,13 @@ const remove = async ({ params, user }, res, next) => {
     const contact = await Contacts.removeContact(params.contactId, user.id);
     if (contact) {
       return res.status(HttpCode.OK).json({
-        status: "success",
+        status: Status.SUCCESS,
         code: HttpCode.OK,
         message: "contact deleted",
       });
     } else {
       return res.status(HttpCode.NOT_FOUND).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
@@ -79,7 +79,7 @@ const update = async ({ params, body, user }, res, next) => {
   try {
     if (!body.name && !body.email && !body.phone) {
       return res.status(HttpCode.BAD_REQUEST).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.BAD_REQUEST,
         message: "missing fields",
       });
@@ -91,7 +91,7 @@ const update = async ({ params, body, user }, res, next) => {
     );
     if (contact) {
       return res.status(HttpCode.OK).json({
-        status: "success",
+        status: Status.SUCCESS,
         code: HttpCode.OK,
         data: {
           contact,
@@ -99,7 +99,7 @@ const update = async ({ params, body, user }, res, next) => {
       });
     } else {
       return res.status(HttpCode.NOT_FOUND).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.NOT_FOUND,
         message: "Not Found",
       });
@@ -109,7 +109,7 @@ const update = async ({ params, body, user }, res, next) => {
   }
 };
 
-export default {
+module.exports = {
   getAll,
   getById,
   create,

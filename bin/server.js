@@ -1,8 +1,7 @@
-import app from "../app.js";
-import db from "../model/db.js";
-import checkOrMakeFolder from "../helpers/create-dir.js";
-import dotenv from "dotenv";
-dotenv.config();
+const app = require("../app");
+const db = require("../model/db");
+const checkOrMakeFolder = require("../helpers/create-dir");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 1313;
 

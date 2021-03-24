@@ -1,13 +1,10 @@
-import Contact from "./schemas/contact.js";
+const Contact = require("./schemas/contact");
 
 async function addContact(body) {
   return await Contact.create(body);
 }
 
-async function listContacts(
-  userId,
-  { limit = "20", page = "1", sub }
-) {
+async function listContacts(userId, { limit = "20", page = "1", sub }) {
   const subscription = sub ? { subscription: [sub] } : {};
   const results = await Contact.paginate(
     {
@@ -49,7 +46,7 @@ async function removeContact(id, userId) {
   return await Contact.findByIdAndRemove({ _id: id, owner: userId });
 }
 
-export default {
+module.exports = {
   addContact,
   listContacts,
   getContactById,

@@ -1,11 +1,10 @@
-import express from "express";
-const { Router } = express;
-import validate from "./validation.js";
-import guard from "../../../helpers/guard.js";
-import upload from "../../../helpers/upload.js";
-import userController from "../../../controllers/users.js";
-import { createAccountLimiter } from "../../../helpers/rate-limit-reg.js";
-const router = Router();
+const express = require("express");
+const router = express.Router();
+const userController = require("../../../controllers/users");
+const guard = require("../../../helpers/guard");
+const upload = require("../../../helpers/upload");
+const validate = require("./validation");
+const { createAccountLimiter } = require("../../../helpers/rate-limit-reg");
 
 router.post(
   "/auth/register",
@@ -27,4 +26,4 @@ router.patch(
   userController.avatars
 );
 router.get("/auth/verify/:verificationToken", userController.verifyToken);
-export default router;
+module.exports = router;

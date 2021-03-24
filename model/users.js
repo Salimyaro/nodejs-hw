@@ -1,4 +1,4 @@
-import User from "./schemas/user.js";
+const User = require("./schemas/user");
 
 const findByEmail = async (email) => {
   return await User.findOne({ email });
@@ -35,7 +35,7 @@ const updateAvatarUrl = async (id, avatar) => {
   return await User.updateOne({ _id: id }, { avatar });
 };
 
-export default {
+module.exports = {
   findByEmail,
   findById,
   findByVerificationToken,

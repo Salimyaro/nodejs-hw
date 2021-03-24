@@ -1,24 +1,23 @@
-import jwt from "jsonwebtoken";
-import Users from "../model/users.js";
-import fs from "fs/promises";
-import path from "path";
-import Jimp from "jimp";
-import { v4 as uuidv4 } from "uuid";
-import checkOrMakeFolder from "../helpers/create-dir.js";
-import { HttpCode } from "../helpers/constants.js";
-import EmailService from "../services/email.js";
-import dotenv from "dotenv";
-dotenv.config();
+const jwt = require("jsonwebtoken");
+const Users = require("../model/users");
+const fs = require("fs/promises");
+const path = require("path");
+const Jimp = require("jimp");
+const { v4: uuidv4 } = require("uuid");
+const checkOrMakeFolder = require("../helpers/create-dir");
+const { HttpCode, Status } = require("../helpers/constants");
+const EmailService = require("../services/email");
+require("dotenv").config();
 
 const SECRET_KEY = process.env.JWT_SECRET;
-const PORT = process.env.PORT
+const PORT = process.env.PORT;
 
 const reg = async ({ body }, res, next) => {
   try {
     const user = await Users.findByEmail(body.email);
     if (user) {
       return res.status(HttpCode.CONFLICT).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.CONFLICT,
         message: "Email in use",
       });
@@ -32,8 +31,9 @@ const reg = async ({ body }, res, next) => {
       verificationToken,
     });
     return res.status(HttpCode.CREATED).json({
-      status: "user created",
+      status: Status.SUCCESS,
       code: HttpCode.CREATED,
+      message: "user created",
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
@@ -51,14 +51,14 @@ const login = async ({ body }, res, next) => {
     const isValidPassword = await user?.validPassword(body.password);
     if (!user || !isValidPassword) {
       return res.status(HttpCode.UNAUTHORIZED).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.UNAUTHORIZED,
         message: "Email or password is wrong",
       });
     }
     if (!user.verify) {
       return res.status(HttpCode.UNAUTHORIZED).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.UNAUTHORIZED,
         message: "Email not verified",
       });
@@ -68,7 +68,7 @@ const login = async ({ body }, res, next) => {
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "2h" });
     await Users.updateToken(id, token);
     return res.status(HttpCode.OK).json({
-      status: "success",
+      status: Status.SUCCESS,
       code: HttpCode.OK,
       data: {
         token,
@@ -86,10 +86,10 @@ const login = async ({ body }, res, next) => {
 
 const logout = async ({ user }, res, next) => {
   try {
-    const loginedUser = await Users.findById(user.id);
+    const loginedUser = await Users.findById(user._id);
     if (!loginedUser) {
       return res.status(HttpCode.UNAUTHORIZED).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.UNAUTHORIZED,
         message: "Not authorized",
       });
@@ -103,16 +103,16 @@ const logout = async ({ user }, res, next) => {
 
 const current = async ({ user }, res, next) => {
   try {
-    const currentUser = await Users.findById(user.id);
+    const currentUser = await Users.findById(user._id);
     if (!currentUser) {
       return res.status(HttpCode.UNAUTHORIZED).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.UNAUTHORIZED,
         message: "Not authorized",
       });
     }
     res.status(HttpCode.OK).json({
-      status: "success",
+      status: Status.SUCCESS,
       code: HttpCode.OK,
       email: currentUser.email,
       subscription: currentUser.subscription,
@@ -126,9 +126,9 @@ const current = async ({ user }, res, next) => {
 const updateSubscription = async ({ user, body }, res, next) => {
   try {
     await Users.updateUserSubscription(user.id, body.subscription);
-    const updatedUser = await Users.findById(user.id);
+    const updatedUser = await Users.findById(user._id);
     return res.status(HttpCode.OK).json({
-      status: "success",
+      status: Status.SUCCESS,
       code: HttpCode.OK,
       user: {
         email: updatedUser.email,
@@ -143,9 +143,9 @@ const updateSubscription = async ({ user, body }, res, next) => {
 const avatars = async (req, res, next) => {
   try {
     const avatarUrl = await saveAvatarToStatic(req);
-    await Users.updateAvatarUrl(req.user.id, avatarUrl);
+    await Users.updateAvatarUrl(req.user._id, avatarUrl);
     return res.json({
-      status: "success",
+      status: Status.SUCCESS,
       code: HttpCode.OK,
       data: {
         avatarUrl,
@@ -165,15 +165,15 @@ const saveAvatarToStatic = async ({ user, file }) => {
     .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
     .writeAsync(file.path);
 
-  await checkOrMakeFolder(path.join(USERS_AVATARS_DIR, user.id));
+  await checkOrMakeFolder(path.join(USERS_AVATARS_DIR, user._id));
   await fs.rename(
     file.path,
-    path.join(USERS_AVATARS_DIR, user.id, newAvatarName)
+    path.join(USERS_AVATARS_DIR, user._id, newAvatarName)
   );
   const avatarUrl = path.normalize(
-    path.join(`http://localhost:${PORT}/images`, user.id, newAvatarName)
+    path.join(`http://localhost:${PORT}/images`, user._id, newAvatarName)
   );
-  
+
   return avatarUrl;
 };
 
@@ -183,15 +183,15 @@ const verifyToken = async (req, res, next) => {
       req.params.verificationToken
     );
     if (user) {
-      await Users.updateVerifyToken(user.id, true, null);
+      await Users.updateVerifyToken(user._id, true, null);
       return res.json({
-        status: "success",
+        status: Status.SUCCESS,
         code: HttpCode.OK,
         message: "Verification successful!",
       });
     }
     return res.status(HttpCode.BAD_REQUEST).json({
-      status: "error",
+      status: Status.ERROR,
       code: HttpCode.BAD_REQUEST,
       message: "User not found",
     });
@@ -200,5 +200,12 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-
-export default { reg, login, logout, current, updateSubscription, avatars, verifyToken };
+module.exports = {
+  reg,
+  login,
+  logout,
+  current,
+  updateSubscription,
+  avatars,
+  verifyToken,
+};

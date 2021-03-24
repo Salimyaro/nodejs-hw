@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
-const { Schema, model } = mongoose;
-import { Subscription } from "../../helpers/constants.js";
-import bcrypt from "bcryptjs";
-import gravatar from "gravatar";
+const { Schema, model } = require("mongoose");
+const bcrypt = require("bcryptjs");
+const gravatar = require("gravatar");
+
+const { Subscription } = require("../../helpers/constants");
 
 const SALT_WORK_FACTOR = 8;
 
@@ -65,4 +65,4 @@ userSchema.methods.validPassword = async function (password) {
 
 const User = model("user", userSchema);
 
-export default User;
+module.exports = User;

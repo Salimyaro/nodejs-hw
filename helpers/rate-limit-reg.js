@@ -1,15 +1,17 @@
-import rateLimit from "express-rate-limit";
-import { HttpCode } from "./constants.js";
+const rateLimit = require("express-rate-limit");
+const { HttpCode, Status } = require("./constants");
 
-export const createAccountLimiter = rateLimit({
+const createAccountLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
   handler: (_req, res, _next) => {
     return res.status(HttpCode.BAD_REQUEST).json({
-      status: "error",
+      status: Status.ERROR,
       code: HttpCode.BAD_REQUEST,
       data: "Bad request",
       message: "Too many registrations. No more than two per hour from one IP",
     });
   },
 });
+
+module.exports = { createAccountLimiter };

@@ -1,10 +1,10 @@
-export const Subscription = {
+const Subscription = {
   FREE: "free",
   PRO: "pro",
   PREMIUM: "premium",
 };
 
-export const HttpCode = {
+const HttpCode = {
   OK: 200,
   CREATED: 201,
   NO_CONTENT: 204,
@@ -14,4 +14,15 @@ export const HttpCode = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500,
+};
+
+const Status = {
+  SUCCESS: "success",
+  ERROR: "error",
+};
+
+module.exports = {
+  Subscription,
+  HttpCode,
+  Status,
 };

@@ -1,20 +1,23 @@
-import passport from "passport";
-import "../config/passport.js";
-import { HttpCode } from "./constants.js";
+const passport = require("passport");
+require("../config/passport");
+const { HttpCode, Status } = require("./constants");
 
 const guard = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user) => {
     const token = req.get("Authorization")?.split(" ")[1];
+
     if (!user || err || token !== user.token) {
       return res.status(HttpCode.UNAUTHORIZED).json({
-        status: "error",
+        status: Status.ERROR,
         code: HttpCode.UNAUTHORIZED,
+        data: "Unauthorized",
         message: "Not authorized",
       });
     }
+
     req.user = user;
     return next();
   })(req, res, next);
 };
 
-export default guard;
+module.exports = guard;
