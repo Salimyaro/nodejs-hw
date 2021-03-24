@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-const { Schema, model, SchemaTypes } = mongoose;
-import mongoosePaginate from "mongoose-paginate-v2";
-import { Subscription } from "../../helpers/constants.js";
+const { Schema, model, SchemaTypes } = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
+
+const { Subscription } = require("../../helpers/constants");
 
 const contactSchema = new Schema(
   {
@@ -40,4 +40,4 @@ const contactSchema = new Schema(
 contactSchema.plugin(mongoosePaginate);
 const Contact = model("contact", contactSchema);
 
-export default Contact;
+module.exports = Contact;

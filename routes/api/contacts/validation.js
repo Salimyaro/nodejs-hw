@@ -1,5 +1,5 @@
-import Joi from "joi";
-import { HttpCode } from "../../../helpers/constants.js";
+const Joi = require("joi");
+const { HttpCode } = require("../../../helpers/constants");
 
 const schemaCreateContact = Joi.object({
   name: Joi.string().min(3).max(60).required(),
@@ -41,7 +41,7 @@ function updateContact(req, _res, next) {
   return validate(schemaUpdateContact, req.body, next);
 }
 
-export default {
+module.exports = {
   createContact,
   updateContact,
 };

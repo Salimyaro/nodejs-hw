@@ -1,4 +1,4 @@
-## node.js hw-06 email
+## node.js hw-07 tests
 
 Задание:
-https://github.com/goitacademy/nodejs-homework/tree/master/homework-06
+покрыть всё тестами

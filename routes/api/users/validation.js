@@ -1,5 +1,5 @@
-import Joi from "joi";
-import { HttpCode, Subscription } from "../../../helpers/constants.js";
+const Joi = require("joi");
+const { HttpCode, Subscription } = require("../../../helpers/constants");
 
 const schemaUser = Joi.object({
   email: Joi.string().email().required(),
@@ -43,7 +43,7 @@ function uploadAvatar(req, _res, next) {
   next();
 }
 
-export default {
+module.exports = {
   user,
   subscriptionUpdate,
   uploadAvatar,

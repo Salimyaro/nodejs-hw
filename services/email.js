@@ -1,9 +1,8 @@
-import Mailgen from "mailgen";
-import sgMail from "@sendgrid/mail";
-import config from "../config/email.json";
+const Mailgen = require("mailgen");
+const sgMail = require("@sendgrid/mail");
+require("dotenv").config();
 
-import dotenv from "dotenv";
-dotenv.config();
+const config = require("../config/email.json");
 
 class EmailService {
   #sender = sgMail;
@@ -65,9 +64,9 @@ class EmailService {
       await this.#sender.send(msg);
       console.log("Verification email sent");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 }
 
-export default EmailService;
+module.exports = EmailService;

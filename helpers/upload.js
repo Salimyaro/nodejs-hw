@@ -1,7 +1,6 @@
-import multer from "multer";
-import path from "path";
-import dotenv from "dotenv";
-dotenv.config();
+const multer = require("multer");
+const path = require("path");
+require("dotenv").config();
 
 const UPLOAD_DIR = path.join(process.cwd(), process.env.UPLOAD_DIR);
 
@@ -26,4 +25,4 @@ const upload = multer({
   },
 });
 
-export default upload;
+module.exports = upload;

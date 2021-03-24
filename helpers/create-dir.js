@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+const fs = require("fs").promises;
 
 const isAccessible = async (path) => {
   try {
@@ -15,4 +15,4 @@ const checkOrMakeFolder = async (folder) => {
   }
 };
 
-export default checkOrMakeFolder;
+module.exports = checkOrMakeFolder;
